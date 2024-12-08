@@ -1,0 +1,85 @@
+\documentclass[minted, draw]{hebdomon}
+
+\usepackage{tikz}
+\usetikzlibrary{decorations.pathreplacing}
+\usetikzlibrary{fadings}
+
+
+\begin{document}
+
+\title{Voronoi Diagram in Hyperbolic Plane\\ Algorithms \& Application}
+\StudentName{MATH430 Final Project}
+\date{Cheng-Yuan Lee}
+
+\maketitle
+\dominitoc
+% \tableofcontents
+\newpage
+
+\Chapter{Introduction}
+\Section{Purpose of the Project}
+
+As a competitive programmer, I have always been fascinated by computational geometry algorithms and their applications in solving a wide range of problems. Among these algorithms, the Voronoi diagram has particularly captured my interest due to its effectiveness in addressing complex challenges encountered in programming competitions. Additionally, the class have introduced me to various types of geometry, with hyperbolic geometry standing out as especially intriguing.
+This curiosity has led me to explore Voronoi diagrams within the hyperbolic plane. I am interested in understanding whether these diagrams can be computed as efficiently as their Euclidean counterparts and what unique problems they might help solve in hyperbolic spaces. This project aims to investigate these questions, delving into the properties and applications of Voronoi diagrams in hyperbolic geometry.
+
+
+\Section{Overview of Voronoi Diagrams}
+
+Given a set \( S \) of \( n \) points in the two-dimensional plane, a \textbf{Voronoi diagram} partitions the plane into distinct regions based on proximity to the points in \( S \). Specifically, each region associated with a point \( p \in S \) consists of all points \( q \) in the plane that are closer to \( p \) than to any other point in \( S \). In other words, a point \( q \) belongs to the region of its nearest neighbor in \( S \).
+
+The Voronoi diagram can be visualized as a planar graph formed by the boundaries between these regions. In this graph:
+\begin{itemize}
+    \item \textbf{Vertices} occur where three or more boundary segments intersect or extend to infinity. These vertices represent points that are equidistant to three or more points in \( S \) and correspond to the circumcenters of the triangles formed by these points.
+    \item \textbf{Edges} are the boundary segments that connect two vertices. Each edge consists of points that are equidistant to exactly two points in \( S \) and lies on the perpendicular bisector of the line segment joining these two points.
+\end{itemize}
+
+This structure not only provides a clear geometric representation of proximity relationships within the set \( S \) but also serves as a foundational tool in various applications, ranging from computer graphics and spatial analysis to problems in competitive programming. 
+
+\begin{figure}
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+					axis equal image,
+					ticks=none,
+					height=6cm,
+					width=10cm,
+				]
+			\addplot [only marks, black] table {points.txt};
+			\addplot [no markers, update limits=false] table {voronoi.txt};
+		\end{axis}
+	\end{tikzpicture}
+        \caption{Example of a Voronoi Diagram in the Euclidean Plane}
+        \label{fig:voronoi}
+\end{figure}
+%
+\Section{Motivation for Hyperbolic Geometry}
+%
+\Chapter{Preliminaries}
+\Section{Basics of Hyperbolic Geometry}
+
+\Section{Voronoi Diagrams}
+
+\Section{Fortune's Algorithm}
+
+\Chapter{Voronoi Diagrams in the Hyperbolic Plane}
+\Section{Construction}
+
+\Section{Examples}
+
+\Chapter{Applications and Relevance}
+
+\Section{Theoretical Importance}
+
+\Section{Practical Applications}
+
+
+\end{document}
+
+%%% Local Variables:
+%%% coding: utf-8
+%%% mode: latex
+%%% TeX-command-extra-options: "-shell-escape"
+%%% TeX-master: t
+%%% TeX-engine: luatex
+%%% End:
+
