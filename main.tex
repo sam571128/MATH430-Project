@@ -101,9 +101,29 @@ where $d(a, b)$ denotes the Euclidean distance between points $a$ and $b$. Each 
 
 The Delaunay triangulation is the dual graph of the Voronoi diagram. Specifically, for each pair of points $p_i$ and $p_j$ whose Voronoi cells $V(p_i)$ and $V(p_j)$ are adjacent (i.e., they share a Voronoi edge), an edge is drawn between $p_i$ and $p_j$ in the Delaunay triangulation. This process results in a graph that triangulates the convex hull of the original set of points. 
 
-\Section{Algorithm's To Compute Voronoi Diagram in Euclidean Plane}
+\Section{Algorithms to Compute Voronoi Diagrams in the Euclidean Plane}
 
-There are some common algorithms that are used to compute the voronoi diagrams in Euclidean Plane. 
+Several algorithms are commonly employed to compute Voronoi diagrams in the Euclidean plane. Below, we outline some of the most widely used methods:
+
+\begin{itemize}
+    \item \textbf{Construct Delaunay Triangulation and Derive Voronoi Diagram}:
+    
+    This approach leverages the duality between Voronoi diagrams and Delaunay triangulations. First, the Delaunay triangulation of the given set of points is constructed. Then, the Voronoi diagram is derived by connecting the circumcenters of the Delaunay triangles. This method is efficient and takes advantage of existing algorithms for Delaunay triangulation.
+    
+    \item \textbf{Incremental Algorithm}:
+    
+    The incremental algorithm builds the Voronoi diagram by adding one point at a time and updating the diagram accordingly. For each new point, the algorithm locates the region where the new Voronoi cell will appear, adjusts the existing cells to accommodate the new cell, and ensures that the diagram remains a valid partition of the plane. This method is relatively simple to implement but can be less efficient for large datasets.
+    
+    \item \textbf{Divide and Conquer}:
+    
+    The divide and conquer algorithm recursively splits the set of points into smaller subsets, computes the Voronoi diagrams for each subset, and then merges them to form the final Voronoi diagram. This approach is highly efficient, especially for large numbers of points, as it reduces the problem size at each recursive step and efficiently combines the partial solutions.
+    
+    \item \textbf{Fortune's Algorithm}:
+    
+    Fortune's algorithm is a sweep line algorithm that constructs the Voronoi diagram in a single pass from left to right across the plane. It uses a priority queue to manage events and a beach line data structure to keep track of the evolving boundary between processed and unprocessed regions. Fortune's algorithm is optimal with a time complexity of $\mathcal{O}(n \log n)$, making it one of the most efficient algorithms for computing Voronoi diagrams.
+\end{itemize}
+
+In this project, we will be focusing on extending the first algorithm, which we will show that we can construct the Delaunay triangulation in $\RP^2$ with existing algorithms to compute the Delaunay triangulation in $\R^2$, then use the constructed Delaunay triangulation to construct the Voronoi diagram.
 
 \Chapter{Voronoi Diagrams in the Hyperbolic Plane}
 
