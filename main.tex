@@ -1,9 +1,18 @@
 \documentclass[minted, draw]{hebdomon}
 
 \usepackage{tikz}
+\usepackage{hyperref, amsmath, amsthm, amsfonts,etoolbox,amscd,flafter,epsf, amssymb, wasysym, graphicx, paralist,appendix,comment,csquotes, mdframed, mathtools, old-arrows}
 \usetikzlibrary{decorations.pathreplacing}
 \usetikzlibrary{fadings}
 
+\newcommand{\R}{{\mathbb{R} }}
+\newcommand{\C}{{\mathbb{C} }}
+\newcommand{\Q}{{\mathbb{Q} }}
+\newcommand{\Z}{{\mathbb{Z} }}
+\newcommand{\F}{{\mathbb{F} }}
+\newcommand{\D}{{\mathbb{D} }}
+\newcommand{\RP}{{\mathbb{R}\mathbb{P} }}
+\newtheorem{theorem}{Theorem}
 
 \begin{document}
 
@@ -13,19 +22,20 @@
 
 \maketitle
 \dominitoc
-% \tableofcontents
+\tableofcontents
 \newpage
 
 \Chapter{Introduction}
 \Section{Purpose of the Project}
 
-As a competitive programmer, I have always been fascinated by computational geometry algorithms and their applications in solving a wide range of problems. Among these algorithms, the Voronoi diagram has particularly captured my interest due to its effectiveness in addressing complex challenges encountered in programming competitions. Additionally, the class have introduced me to various types of geometry, with hyperbolic geometry standing out as especially intriguing.
+As a competitive programmer, I have always been fascinated by computational geometry algorithms and their applications in solving a wide range of problems. Among these algorithms, the Voronoi diagram has particularly captured my interest due to its effectiveness in addressing complex challenges encountered in programming competitions. Additionally, the class have introduced me to various types of geometry, with hyperbolic geometry standing out as especially intriguing. \\
+
 This curiosity has led me to explore Voronoi diagrams within the hyperbolic plane. I am interested in understanding whether these diagrams can be computed as efficiently as their Euclidean counterparts and what unique problems they might help solve in hyperbolic spaces. This project aims to investigate these questions, delving into the properties and applications of Voronoi diagrams in hyperbolic geometry.
 
 
 \Section{Overview of Voronoi Diagrams}
 
-Given a set \( S \) of \( n \) points in the two-dimensional plane, a \textbf{Voronoi diagram} partitions the plane into distinct regions based on proximity to the points in \( S \). Specifically, each region associated with a point \( p \in S \) consists of all points \( q \) in the plane that are closer to \( p \) than to any other point in \( S \). In other words, a point \( q \) belongs to the region of its nearest neighbor in \( S \).
+Given a set \( S \) of \( n \) points in the two-dimensional plane, a \textbf{Voronoi diagram} partitions the plane into distinct regions based on proximity to the points in \( S \). Specifically, each region associated with a point \( p \in S \) consists of all points \( q \) in the plane that are closer to \( p \) than to any other point in \( S \). In other words, a point \( q \) belongs to the region of its nearest neighbor in \( S \). \\
 
 The Voronoi diagram can be visualized as a planar graph formed by the boundaries between these regions. In this graph:
 \begin{itemize}
@@ -54,22 +64,84 @@ This structure not only provides a clear geometric representation of proximity r
 %
 \Section{Motivation for Hyperbolic Geometry}
 
-In recent years, there has been a significant shift in machine learning towards leveraging non-Euclidean geometries. Traditional Euclidean geometry often falls short when representing complex datasets that exhibit hierarchical or tree-like structures, which are inherently non-Euclidean. Hyperbolic geometry, with its unique properties, provides a natural framework for modeling such data more effectively.
+In recent years, there has been a significant shift in machine learning towards leveraging non-Euclidean geometries. Traditional Euclidean geometry often falls short when representing complex datasets that exhibit hierarchical or tree-like structures, which are inherently non-Euclidean. Hyperbolic geometry, with its unique properties, provides a natural framework for modeling such data more effectively. \\
 
-A notable advancement in this area is the development of Hyperbolic Neural Networks by Ganea et al. in 2018. These networks demonstrated improved performance on tasks involving hierarchical data, highlighting the potential of hyperbolic spaces in machine learning applications. This trend underscores the growing importance of understanding non-Euclidean geometries and their algorithms.
+A notable advancement in this area is the development of Hyperbolic Neural Networks by Ganea et al. in 2018. These networks demonstrated improved performance on tasks involving hierarchical data, highlighting the potential of hyperbolic spaces in machine learning applications. This trend underscores the growing importance of understanding non-Euclidean geometries and their algorithms. \\
 
 Given this momentum, it is crucial to explore how fundamental algorithms, such as Voronoi diagrams, operate within hyperbolic spaces. Voronoi diagrams play a key role in various applications, including nearest neighbor search, clustering, and spatial partitioning. Investigating their behavior in the hyperbolic plane not only enhances our theoretical understanding of hyperbolic geometry but also contributes to the development of more efficient and effective algorithms tailored for complex, real-world datasets.
 
 \Chapter{Preliminaries}
 \Section{Basics of Hyperbolic Geometry}
 
-In this paper, we will be discussing the construction of the Voronoi diagram in Poincare's upper half-plane model.
+This study explores the construction of the Voronoi diagram within the Poincaré upper half-plane model. By utilizing Möbius transformations, we can transition between various disk models of hyperbolic geometry, simplifying discussions. In the Poincaré upper half-plane model, each point $(a, b)$ in 2D is viewed as a complex number $z = a + bi$, with the hyperbolic plane defined as $\RP^2 = \{a+bi \mid b \ge 0\}$. Within this framework, lines take the form of either half circles or straight segments. These non-Euclidean lines conform to all Euclidean geometry axioms, excluding the parallel postulate. \\
 
-\Section{Voronoi Diagrams}
+We can express each of these two lines as follows:
+\begin{enumerate}
+    \item Half-circle with center at $z = p$ with radius $r$: $(x-p)^2 + y^2 = r^2$.
+    \item Straight line: $x = c$. 
+\end{enumerate}
 
-\Section{Fortune's Algorithm}
+With these, we can define the distance between two points $p_1 = x_1 + y_1i, p_2 = x_2 + y_2i$ by
+\[
+    d(p_1, p_2) = \left |  \ln \dfrac{A + \sqrt{A^2 - 4y_1^2y_2^2}}{A - \sqrt{A^2 - 4y_1^2y_2^2}} \right |
+\]
+where $A = (x_1-x_2)^2 + (y_1^2+y_2^2)$. \\
+
+We may verify that this definition coincides with the definition of using cross ratios of the points as defined in class.
+
+\Section{Voronoi Diagram}
+
+Given a set of points $\{p_1, p_2, \dots, p_n\}$ in the 2D Euclidean plane, the Voronoi cell $V(p_i)$ for a point $p_i$ is defined as
+\[
+V(p_i) = \left\{ p \in \mathbb{R}^2 \;\bigg|\; d(p, p_i) \leq d(p, p_j) \quad \forall j \neq i \right\},
+\]
+where $d(a, b)$ denotes the Euclidean distance between points $a$ and $b$. Each Voronoi cell is a polygon in the Euclidean plane, and adjacent cells share common edges. Collectively, these polygons partition $\mathbb{R}^2$, forming what is known as the Voronoi diagram. The vertices of these polygons are referred to as Voronoi vertices, and the shared boundaries are called Voronoi edges.
+
+\Section{Delaunay Triangulation}
+
+The Delaunay triangulation is the dual graph of the Voronoi diagram. Specifically, for each pair of points $p_i$ and $p_j$ whose Voronoi cells $V(p_i)$ and $V(p_j)$ are adjacent (i.e., they share a Voronoi edge), an edge is drawn between $p_i$ and $p_j$ in the Delaunay triangulation. This process results in a graph that triangulates the convex hull of the original set of points. 
+
+\Section{Algorithm's To Compute Voronoi Diagram in Euclidean Plane}
+
+There are some common algorithms that are used to compute the voronoi diagrams in Euclidean Plane. 
 
 \Chapter{Voronoi Diagrams in the Hyperbolic Plane}
+
+\Section{Compute Geometric Primitives in Hyperbolic Plane}
+
+Before we jump into the Voronoi diagram in hyperbolic plane, we will first discuss some geometric primitives in the hyperbolic plane. 
+
+We will be discussing two things, the perpendicular bisector and circles, in the hyperbolic plane. We have the following two theorems:
+
+\begin{theorem}
+    A perpendicular bisector of two points $p_1, p_2 \in \RP^2$ is a line on the Hyperbolic plane. 
+\end{theorem}
+
+\begin{proof}
+    For two points $p_1 = (x_1, y_1)$, $p_2 = (x_2, y_2)$, we have two cases:
+    \begin{enumerate}
+        \item $y_1 = y_2$, then the perpendicular bisector is a straight line:
+        \[
+        x = \frac{x_1 + x_2}{2}
+        \]
+        \item Otherwise, let $p = (x,y)$ be a point on the perpendicular bisector, then we have
+        \[
+            d(p, p_1) = d(p, p_2)
+        \]
+        We can substitute the distance formula into the equation, and after some rearrangement, we will arrive at the following equation:
+        \[
+        \left (x-\dfrac{x_1y_2-x_2y_1}{y_2-y_1} \right)^2 + y^2 = y_1y_2 \left ( \left ( \dfrac{x_1-x_2}{y_1-y_2}\right )^2 + 1 \right )
+        \]
+        This is a half-circle with center at $\left (\dfrac{x_1y_2-x_2y_1}{y_2-y_1}, 0 \right)$ with $r^2 = y_1y_2 \left ( \left ( \dfrac{x_1-x_2}{y_1-y_2}\right )^2 + 1 \right )$.
+    \end{enumerate}
+\end{proof}
+
+\begin{theorem}
+    The set of equidistant points from a given point $p_1 = (x_1, y_1)$ is a circle in the Euclidean plane.
+\end{theorem}
+
+\Section{Definition of Voronoi Diagram in Hyperbolic Plane}
+
 \Section{Construction}
 
 \Section{Examples}
@@ -77,6 +149,8 @@ In this paper, we will be discussing the construction of the Voronoi diagram in 
 \Chapter{Applications and Relevance}
 
 \Section{Visualization}
+
+To visualize the Voronoi Diagram, we will be using
 
 \Section{Theoretical Importance}
 
