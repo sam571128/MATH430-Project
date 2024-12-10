@@ -11,8 +11,9 @@
 \newcommand{\Z}{{\mathbb{Z} }}
 \newcommand{\F}{{\mathbb{F} }}
 \newcommand{\D}{{\mathbb{D} }}
-\newcommand{\RP}{{\mathbb{R}\mathbb{P} }}
+\newcommand{\HH}{{\mathbb{H} }}
 \newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
 
 \begin{document}
 
@@ -73,9 +74,9 @@ Given this momentum, it is crucial to explore how fundamental algorithms, such a
 \Chapter{Preliminaries}
 \Section{Basics of Hyperbolic Geometry}
 
-This study explores the construction of the Voronoi diagram within the Poincaré upper half-plane model. By utilizing Möbius transformations, we can transition between various disk models of hyperbolic geometry, simplifying discussions. In the Poincaré upper half-plane model, each point $(a, b)$ in 2D is viewed as a complex number $z = a + bi$, with the hyperbolic plane defined as $\RP^2 = \{a+bi \mid b \ge 0\}$. Within this framework, lines take the form of either half circles or straight segments. These non-Euclidean lines conform to all Euclidean geometry axioms, excluding the parallel postulate. \\
+This study explores the construction of the Voronoi diagram within the Poincaré upper half-plane model. By utilizing Möbius transformations, we can transition between various disk models of hyperbolic geometry, simplifying discussions. In the Poincaré upper half-plane model, each point $(a, b)$ in 2D is viewed as a complex number $z = a + bi$, with the hyperbolic plane defined as $\HH^2 = \{a+bi \mid b \ge 0\}$. Within this framework, geodesic lines take the form of either half circles or straight segments. These non-Euclidean lines conform to all Euclidean geometry axioms, excluding the parallel postulate. \\
 
-We can express each of these two lines as follows:
+We can express each of these two geodesic lines as follows:
 \begin{enumerate}
     \item Half-circle with center at $z = p$ with radius $r$: $(x-p)^2 + y^2 = r^2$.
     \item Straight line: $x = c$. 
@@ -101,6 +102,8 @@ where $d(a, b)$ denotes the Euclidean distance between points $a$ and $b$. Each 
 
 The Delaunay triangulation is the dual graph of the Voronoi diagram. Specifically, for each pair of points $p_i$ and $p_j$ whose Voronoi cells $V(p_i)$ and $V(p_j)$ are adjacent (i.e., they share a Voronoi edge), an edge is drawn between $p_i$ and $p_j$ in the Delaunay triangulation. This process results in a graph that triangulates the convex hull of the original set of points. 
 
+To give a formal definition. Let \( P = \{p_1, p_2, \ldots, p_n\} \) be a set of distinct points in the Euclidean plane \( \mathbf{R}^2 \). The \textbf{Delaunay graph} \( \mathcal{D}_{\mathbf{R}^2}(P) \) is an undirected graph where each pair of points \( (p_i, p_j) \) is connected by an edge if and only if there exists a \textbf{Euclidean circle} passing through both \( p_i \) and \( p_j \) that contains no other points from \( P \) in its interior.
+
 \Section{Algorithms to Compute Voronoi Diagrams in the Euclidean Plane}
 
 Several algorithms are commonly employed to compute Voronoi diagrams in the Euclidean plane. Below, we outline some of the most widely used methods:
@@ -123,67 +126,154 @@ Several algorithms are commonly employed to compute Voronoi diagrams in the Eucl
     Fortune's algorithm is a sweep line algorithm that constructs the Voronoi diagram in a single pass from left to right across the plane. It uses a priority queue to manage events and a beach line data structure to keep track of the evolving boundary between processed and unprocessed regions. Fortune's algorithm is optimal with a time complexity of $\mathcal{O}(n \log n)$, making it one of the most efficient algorithms for computing Voronoi diagrams.
 \end{itemize}
 
-In this project, we will be focusing on extending the first algorithm, which we will show that we can construct the Delaunay triangulation in $\RP^2$ with existing algorithms to compute the Delaunay triangulation in $\R^2$, then use the constructed Delaunay triangulation to construct the Voronoi diagram.
+In this project, we will be focusing on extending the first algorithm, which we will show that we can construct the Delaunay triangulation in $\HH^2$ with existing algorithms to compute the Delaunay triangulation in $\R^2$, then use the constructed Delaunay triangulation to construct the Voronoi diagram. The algorithm is described in the paper "Construction of Voronoi Diagram on the Upper Half-Plane" by Onishi and Takayama.
 
 \Chapter{Voronoi Diagrams in the Hyperbolic Plane}
 
 \Section{Compute Geometric Primitives in Hyperbolic Plane}
 
-Before we jump into the Voronoi diagram in hyperbolic plane, we will first discuss some geometric primitives in the hyperbolic plane. 
+Before we delve into computing the Delaunay triangulation and Voronoi diagram in the hyperbolic plane, we first discuss some fundamental geometric primitives within this context.
 
-We will be discussing two things, the perpendicular bisector and circles, in the hyperbolic plane. We have the following two theorems:
+We will focus on two key concepts: the perpendicular bisector of two points and circles in the hyperbolic plane. The following two theorems formalize these ideas:
 
 \begin{theorem}
-    A perpendicular bisector of two points $p_1, p_2 \in \RP^2$ is a line on the Hyperbolic plane. 
+    Let $p_1 = (x_1, y_1)$ and $p_2 = (x_2, y_2)$ be two distinct points in the hyperbolic plane $\mathbb{H}^2$. The perpendicular bisector of $p_1$ and $p_2$ is a geodesic line in the hyperbolic plane.
 \end{theorem}
 
 \begin{proof}
-    For two points $p_1 = (x_1, y_1)$, $p_2 = (x_2, y_2)$, we have two cases:
+    Consider two points $p_1 = (x_1, y_1)$ and $p_2 = (x_2, y_2)$ in the hyperbolic plane, represented here using the upper half-plane model. We aim to find the locus of points $p = (x, y)$ that are equidistant from $p_1$ and $p_2$, i.e., 
+    \[
+        d(p, p_1) = d(p, p_2).
+    \]
+    
+    The hyperbolic distance between two points $(x, y)$ and $(x', y')$ in the upper half-plane model is given by:
+    \[
+        d\left((x, y), (x', y')\right) =\left |  \ln \dfrac{A + \sqrt{A^2 - 4y^2y'^2}}{A - \sqrt{A^2 - 4y^2y'^2}} \right | = \frac{1}{2}\cosh^{-1}\left(1 + \frac{(x - x')^2 + (y - y')^2}{2 y y'}\right).
+    \]
+    
+    Setting $d(p, p_1) = d(p, p_2)$ and simplifying, we consider two cases:
+
     \begin{enumerate}
-        \item $y_1 = y_2$, then the perpendicular bisector is a straight line:
+        \item \textbf{Horizontal Alignment ($y_1 = y_2$)}: If the two points lie on the same horizontal line, the perpendicular bisector simplifies to a vertical line. Specifically, 
         \[
-        x = \frac{x_1 + x_2}{2}
+            x = \frac{x_1 + x_2}{2}.
         \]
-        \item Otherwise, let $p = (x,y)$ be a point on the perpendicular bisector, then we have
+        This line is a vertical geodesic in the hyperbolic plane.
+
+        \item \textbf{General Position ($y_1 \neq y_2$)}: For points not aligned horizontally, the set of equidistant points forms a semicircle orthogonal to the boundary of the upper half-plane. To derive its equation, we start with:
         \[
-            d(p, p_1) = d(p, p_2)
+            \frac{(x - x_1)^2 + (y - y_1)^2}{2 y y_1} = \frac{(x - x_2)^2 + (y - y_2)^2}{2 y y_2}.
         \]
-        We can substitute the distance formula into the equation, and after some rearrangement, we will arrive at the following equation:
+        After simplifying, we obtain:
         \[
-        \left (x-\dfrac{x_1y_2-x_2y_1}{y_2-y_1} \right)^2 + y^2 = y_1y_2 \left ( \left ( \dfrac{x_1-x_2}{y_1-y_2}\right )^2 + 1 \right )
+            \left(x - \frac{x_1 y_2 - x_2 y_1}{y_2 - y_1}\right)^2 + y^2 = \frac{y_1 y_2 \left(\left(\frac{x_1 - x_2}{y_1 - y_2}\right)^2 + 1\right)}{1}.
         \]
-        This is a half-circle with center at $\left (\dfrac{x_1y_2-x_2y_1}{y_2-y_1}, 0 \right)$ with $r^2 = y_1y_2 \left ( \left ( \dfrac{x_1-x_2}{y_1-y_2}\right )^2 + 1 \right )$.
+        This represents a semicircle with center at $\left(\dfrac{x_1 y_2 - x_2 y_1}{y_2 - y_1}, 0\right)$ and radius squared given by:
+        \[
+            r^2 = y_1 y_2 \left(\left(\frac{x_1 - x_2}{y_1 - y_2}\right)^2 + 1\right).
+        \]
+        In the upper half-plane model, such a semicircle is a geodesic in the hyperbolic plane.
     \end{enumerate}
+    
+    Therefore, in both cases, the perpendicular bisector is a geodesic line in the hyperbolic plane. 
 \end{proof}
 
+\begin{lemma}
+    A hyperbolic circle, defined as the set of points at a fixed hyperbolic distance $r$ from a center point $p_1 = (x_1, y_1)$ in the hyperbolic plane, corresponds to a Euclidean circle in the upper half-plane model. The equation of this circle is:
+    \[
+        (x - x_1)^2 + \left(y - y_1 \cosh r\right)^2 = \left(y_1 \sinh r\right)^2.
+    \]
+    Additionally, the center point $p_1$ lies inside this Euclidean circle.
+\end{lemma}
+
+\begin{proof}
+    Let $p = (x, y)$ be any point on the hyperbolic circle centered at $p_1 = (x_1, y_1)$ with hyperbolic radius $r$. By definition, the hyperbolic distance between $p$ and $p_1$ satisfies:
+    \[
+        d(p, p_1) = r.
+    \]
+    Using the hyperbolic distance formula in the upper half-plane model:
+    \[
+        \cosh r = 1 + \frac{(x - x_1)^2 + (y - y_1)^2}{2 y y_1}.
+    \]
+    Rearranging terms, we get:
+    \[
+        (x - x_1)^2 + (y - y_1)^2 = 2 y y_1 (\cosh r - 1).
+    \]
+    Using the hyperbolic identity $\cosh^2 r - \sinh^2 r = 1$, we can express $2 (\cosh r - 1)$ as $2 \sinh^2 \left(\frac{r}{2}\right)$ or manipulate it to obtain the standard form of a Euclidean circle. Completing the square for the $y$-terms leads to:
+    \[
+        (x - x_1)^2 + \left(y - y_1 \cosh r\right)^2 = \left(y_1 \sinh r\right)^2.
+    \]
+    This is the equation of a Euclidean circle with center at $(x_1, y_1 \cosh r)$ and radius $y_1 \sinh r$. Since $\cosh r > 1$ and $\sinh r > 0$ for $r > 0$, the original point $p_1 = (x_1, y_1)$ lies inside this Euclidean circle.
+\end{proof}
+
+Before providing the algorithm for constructing the Voronoi diagram in $H^2$, we will require another geometric primitive. We want to check whether there exists a equidistant point to a given set of 3 points $p_1, p_2, p_3$ in the hyperbolic plane, which basically is the center of the hyperbolic circle passing through all three points.
+
 \begin{theorem}
-    The set of equidistant points from a given point $p_1 = (x_1, y_1)$ is a circle in the Euclidean plane.
+    There exists a equidistant point to a given set of 3 points $p_1, p_2, p_3$ in the hyperbolic plane if and only if the hyperbolic circle passing through the three points with the form
+    \[
+    \alpha(x^{2}+y^{2})-\beta y+\gamma x-\delta=0\ \ (\alpha,\beta,\gamma,\delta\in\mathbf{R})
+    \]
+    satisfies $\alpha\neq0,\;\frac{\beta}{2\alpha} > 0$ and $4\alpha\delta+\gamma^{2}<0$
+\end{theorem} 
+
+We know that we can compute the Euclidean circumcircle of three points with the following determinant:
+\[
+\left|{\begin{array}{c c c c}{1}&{x_{1}}&{y_{1}}&{{x_{1}}^{2}+{y_{1}}^{2}}\\ {1}&{x_{2}}&{y_{2}}&{{x_{2}}^{2}+{y_{2}}^{2}}\\ {1}&{x_{3}}&{y_{3}}&{{x_{3}}^{2}+{y_{3}}^{2}}\\ {1}&{x}&{y}&{{x}^{2}+{y}^{2}}\end{array}}\right|=0
+\]
+
+Hence, by expanding the expression, we can get the center of the Euclidean circle. Let the center be $c = (x_0, y_0)$ and radius be $r$. Then we can compute the hyperbolic center $c_h = (x_1, y_1)$ and radius $r_h$ by solving
+\[
+\begin{cases}
+    x_0 = x_1 \\
+    y_0 = y_1 \cosh r_h \\
+    r = y_1 \sinh r_h
+\end{cases}
+\]
+This provided us a method to compute the hyperbolic center in $O(1)$.
+
+\Section{Voronoi Diagram \& Delaunay Triangulation in Hyperbolic Plane}
+
+Similar to the definitions in the Euclidean plane, we will define Voronoi polygons in the hyperbolic plane as
+\[
+V(p_i) = \left\{ p \in \HH^2 \;\bigg|\; d(p, p_i) \leq d(p, p_j) \quad \forall j \neq i \right\},
+\]
+These polygons form the Voronoi diagram in the hyperbolic plane. \\
+
+Let \( P = \{p_1, p_2, \ldots, p_n\} \) be a set of distinct points in the hyperbolic upper half-plane \( \HH = \{ (x, y) \in \R^2 \mid y > 0 \} \) equipped with the hyperbolic metric. The \textbf{Delaunay graph} \( \mathcal{D}_{\HH}(P) \) is an undirected graph where each pair of points \( (p_i, p_j) \) is connected by an edge if and only if there exists a \textbf{hyperbolic circle} passing through both \( p_i \) and \( p_j \) that contains no other points from \( P \) in its interior with respect to the hyperbolic metric.
+
+\begin{theorem}
+The Delaunay graph in the hyperbolic upper half-plane \( \HH \) is a subgraph of the Delaunay graph in the Euclidean plane \( \R^2 \). Formally, \( \mathcal{D}_{\HH}(P) \subseteq \mathcal{D}_{\R^2}(P) \).
 \end{theorem}
 
-\Section{Definition of Voronoi Diagram in Hyperbolic Plane}
+\begin{proof}
+Consider a set of points \( P \subset \HH \), where \( \HH \) denotes the hyperbolic upper half-plane model \( \{(x, y) \in \R^2 \mid y > 0\} \). Suppose that an edge \( (p_i, p_j) \) exists in the hyperbolic Delaunay graph \( \mathcal{D}_{\HH}(P) \). By the definition of the hyperbolic Delaunay graph, there exists a hyperbolic circle \( C_H \) passing through \( p_i \) and \( p_j \) that contains no other points from \( P \) in its interior with respect to the hyperbolic metric. \\
+
+In the upper half-plane model, hyperbolic circles correspond to either Euclidean circles entirely contained within \( \HH \) or Euclidean vertical lines (which can be regarded as circles with infinite radius). Since \( C_H \) contains no other points from \( P \) in its hyperbolic interior, its corresponding Euclidean representation \( C_E \) must also be devoid of other points from \( P \) in its Euclidean interior. This is because the hyperbolic metric scales distances in a way that if a hyperbolic circle contains no points from \( P \), the corresponding Euclidean circle or line cannot contain any additional points from \( P \) within its Euclidean interior. \\
+
+Therefore, the existence of the Euclidean empty circle \( C_E \) passing through \( p_i \) and \( p_j \) with no other points from \( P \) inside implies, by the definition of the Euclidean Delaunay graph, that \( (p_i, p_j) \) must also be an edge in \( \mathcal{D}_{\R^2}(P) \). \\
+
+Since this reasoning holds for any arbitrary edge in \( \mathcal{D}_{\HH}(P) \), it follows that every edge in the hyperbolic Delaunay graph is also present in the Euclidean Delaunay graph. Consequently, we conclude that \( \mathcal{D}_{\HH}(P) \subseteq \mathcal{D}_{\R^2}(P) \).
+\end{proof}
 
 \Section{Construction}
 
-\Section{Examples}
+Based on the proof provided above, we can develop the following algorithm:
+\begin{enumerate}
+    \item Treat the set of points \( S \) in \( \HH^2 \) as points in \( \R^2 \), and compute the Delaunay triangulation in \( \R^2 \) using the known \( O(n \log n) \) algorithm.
+    \item For each edge in the Delaunay triangulation of $\R^2$, remove those edges that are not present in the Delaunay triangulation of \( \HH^2 \).
+    \item Finally, compute the Voronoi diagram from the refined Delaunay triangulation obtained in the previous step in \( O(n) \) time.
+\end{enumerate}
 
-\Chapter{Applications and Relevance}
+We will show that the second step can be done in $O(n)$. \\
 
-\Section{Visualization}
+To do the second step, for all triangles formed by $p_1, p_2, p_3$ in the Delaunay triangulation in $\R^2$, we can compute the center of the hyperbolic circle that passed through all three points. If there does not exist such a point, we will can simply remove the longest edge of this triangle. We have described the method to compute the center of the hyperbolic circle in the previous section. Since we are computing the determinant of a matrix of size $4 \times 4$, we can do this in $O(1)$. Therefore, this algorithm runs in $O(n \log n)$.
 
-To visualize the Voronoi Diagram, we will be using
-
-\Section{Theoretical Importance}
-
-\Section{Practical Applications}
-
-
+\newpage 
+\section*{References}
+\begin{enumerate}
+    \item F. Nielsen and R. Nock, “Hyperbolic Voronoi diagrams made easy,” arxiv.org, Mar. 2009, doi: https://doi.org/10.1109/ICCSA.2010.37.
+    \item F. Nielsen and R. Nock, “Visualizing hyperbolic Voronoi diagrams,” CiteSeer X (The Pennsylvania State University), pp. 90–91, May 2014, doi: https://doi.org/10.1145/2582112.2595647.
+    \item Onishi, K., Takayama, N.: Construction of Voronoi diagram on the upper halfplane. IEICE Transactions 79-A(4) (1996) 533–539
+    \item O.-E. Ganea, G. Bécigneul, and T. Hofmann, “Hyperbolic Neural Networks,” arXiv.org, 2018. https://arxiv.org/abs/1805.09112 (accessed Dec. 10, 2024).
+\end{enumerate}
 \end{document}
-
-%%% Local Variables:
-%%% coding: utf-8
-%%% mode: latex
-%%% TeX-command-extra-options: "-shell-escape"
-%%% TeX-master: t
-%%% TeX-engine: luatex
-%%% End:
-
